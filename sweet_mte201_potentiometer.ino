@@ -27,8 +27,8 @@ void loop() {
   float wiperLength = getDistance(WIPER_PIN);
   float coeff = getCoefficient(wiperLength);
   wiperLength *= coeff;
-  Serial.println((String)(wiperLength+LENGTH_OUTLIER));
-  delay(500);
+  Serial.println((String)(round(wiperLength+LENGTH_OUTLIER)));
+  delay(100);
 }
 
 //Returns length in mm based on analog reading. Param: analog read port

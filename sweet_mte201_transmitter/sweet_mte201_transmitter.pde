@@ -35,11 +35,12 @@ void setup()
   //Configure serial list index to listen to Arduino port
   port = new Serial( this, Serial.list()[0], 9600 );
   
+  
   //Setup writer
   output = createWriter( "sweet_mte201_data.txt" );
   
   //Setup GUI
-  size(1000, 500);
+  size(1000, 700);
   cp5 = new ControlP5(this);
   PFont font = createFont("arial", 30);
   textFont(font);
@@ -72,11 +73,11 @@ void draw()
   if (val != null)
   {
     //Verify value obtained from serial is valid - check if decimal exists
-    if(val.toString().contains(".")){
+    /*if(val.toString().contains(".")){
       char[] arr = val.toString().trim().toCharArray();
       //Verify number format transmitted correctly over serial
       if(arr.length > 3 && arr[arr.length-3] == '.' && arr[0] != '.'){
-        output.println(val);
+        output.println(val);*/
         displayVal = val;
         lastDisplayVal = displayVal;
         
@@ -91,12 +92,12 @@ void draw()
           normPlot = getNormal(sampleMean, stdDev);
         }      
       //if value is not valid, then display previous value
-      } else 
-          displayVal = lastDisplayVal;
+      /*} else 
+          displayVal = lastDisplayVal;*/
       //if value has no decimal, then display previous value
      } else 
        displayVal = lastDisplayVal;
-  }
+  //}
   
   displayAndFlush();
 }
@@ -105,11 +106,51 @@ void draw()
 void displayAndFlush(){
   output.flush();
   fill(255);
-  text("Current displacement(mm) is equal to: " + displayVal, 50, 200);
-  text("Sample Size: " + counter, 50, 150);
-  text("Sample mean: " + sampleMean, 50, 250);
-  text("Standard deviation: " + stdDev, 50, 300);
-  text("Normal Plot: " + normPlot, 50, 350);
+  text("Displacement(mm ±3): " + displayVal, 10, 50);
+  text("Mode(mm ±3): " + getMode(list), 10, 100);
+  text("Median(mm ±3): " + getMedian(list), 10, 150);
+  text("Sample Size: " + counter, 10, 200);
+  text("Sample mean: " + sampleMean, 10, 250);
+  text("Standard deviation: " + stdDev, 10, 300);
+  text("Normal Plot: " + normPlot, 10, 350);
+}
+
+float getMode(FloatList list){
+  if(list.size() > 0){
+    list.sort();
+    float mode = list.get(0);
+    float modeCount = 1;
+  
+    float currentNum = list.get(0);
+    float currentCount = 1;
+  
+    for(int i = 1; i < list.size(); i++){
+      currentNum = list.get(i);
+      if(list.get(i-1) == currentNum){
+        currentCount ++;
+      } else
+        currentCount = 1;
+      if(currentCount == modeCount)
+          mode =  (currentNum + mode) / 2; 
+      if(currentCount > modeCount){
+        modeCount = currentCount;
+        mode = currentNum;
+      }
+    }
+    return mode;
+  } else
+    return -1;
+}
+
+float getMedian(FloatList list){
+ list.sort();
+ if(list.size() > 1){
+   if(list.size() % 2 == 0)
+     return (list.get(((list.size())/2)-1)+list.get((list.size())/2))/2;
+   else
+     return list.get((list.size()/2)-1);
+ }else
+   return -1;
 }
 
 //Function determines sample mean using current data
@@ -142,7 +183,6 @@ float getStandardDeviation(float sampleMean) {
 float getNormal(float sampleMean, float stdDev){
   return (randomGaussian() * stdDev) + sampleMean;
 }
-
 
 //Update function to update button
 void updateButton() {
