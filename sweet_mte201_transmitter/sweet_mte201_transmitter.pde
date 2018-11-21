@@ -1,11 +1,14 @@
 import controlP5.*;
 import processing.serial.*;
-//Author: Connor Sweet
 /*
-INSTRUCTIONS:
- 1. Note the COM port of the Arduino attached to the PC. Set 'port' to also communicate with this port.
- 2. Upload the Arduino code to the Arduino attached to the PC.
- 3. Run this code. "sweet_mte201_data.txt" will be created inside this directory.
+ * MTE_201_Potentiometer
+ * Arduino code for linear potentiometer
+ * Author: Connor Sweet
+ *
+ * INSTRUCTIONS:
+ * 1. Note the COM port of the Arduino attached to the PC. Set 'port' to also communicate with this port.
+ * 2. Upload the Arduino code to the Arduino attached to the PC.
+ * 3. Run this code. "sweet_mte201_data.txt" will be created inside this directory.
  */
 
 //Varaibles for IO
@@ -51,7 +54,7 @@ void setup()
   butX = width/2 - butSize - 10;
   butY = width/2 - butSize - 10;
 
-  //Set up measurement ssand sample tracking
+  //Set up measurements and sample tracking
   list = new FloatList();
   counter = 0;
   normPlot = 0;
@@ -69,36 +72,24 @@ void draw()
   //Get newest value
   String val = port.readString();
   
-  //Veify value is not null
+  //Verify value is not null
   if (val != null)
   {
-    //Verify value obtained from serial is valid - check if decimal exists
-    /*if(val.toString().contains(".")){
-      char[] arr = val.toString().trim().toCharArray();
-      //Verify number format transmitted correctly over serial
-      if(arr.length > 3 && arr[arr.length-3] == '.' && arr[0] != '.'){
-        output.println(val);*/
-        displayVal = val;
-        lastDisplayVal = displayVal;
-        
-        //Append value and calculate related values if valid
-        if (val != "" && !Float.isNaN(float(val))) {
-          print("Value obtained: " + val);
-          list.append(float(val));
-          counter++;
-          //get sample mean, standard deviation, normal
-          sampleMean = getSampleMean();
-          stdDev = getStandardDeviation(sampleMean);
-          normPlot = getNormal(sampleMean, stdDev);
-        }      
-      //if value is not valid, then display previous value
-      /*} else 
-          displayVal = lastDisplayVal;*/
-      //if value has no decimal, then display previous value
-     } else 
-       displayVal = lastDisplayVal;
-  //}
-  
+    displayVal = val;
+    lastDisplayVal = displayVal;
+    //Append value and calculate related values if valid
+    if (val != "" && !Float.isNaN(float(val))) {
+      print("Value obtained: " + val);
+      list.append(float(val));
+      counter++;
+      //get sample mean, standard deviation, normal
+      sampleMean = getSampleMean();
+      stdDev = getStandardDeviation(sampleMean);
+      normPlot = getNormal(sampleMean, stdDev);
+     }      
+  } else 
+    displayVal = lastDisplayVal;
+ 
   displayAndFlush();
 }
 
@@ -115,6 +106,7 @@ void displayAndFlush(){
   text("Normal Plot: " + normPlot, 10, 350);
 }
 
+//Function determines mode using current data
 float getMode(FloatList list){
   if(list.size() > 0){
     list.sort();
@@ -142,6 +134,7 @@ float getMode(FloatList list){
     return -1;
 }
 
+//Function determines median using current data
 float getMedian(FloatList list){
  list.sort();
  if(list.size() > 1){
